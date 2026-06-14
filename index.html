@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>恋垢プロフィールメーカー</title>
+  <title>恋垢プロフィール帳メーカー</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body class="tone-rose">
@@ -12,12 +12,12 @@
       <header class="title">
         <span class="logo">恋</span>
         <div>
-          <h1>恋垢プロフィールメーカー</h1>
-          <p>横長シンプルカード</p>
+          <h1>恋垢プロフィール帳メーカー</h1>
+          <p>横長1600×900px</p>
         </div>
       </header>
 
-      <div class="tabs" role="tablist" aria-label="入力カテゴリ">
+      <div class="tabs">
         <button class="tab is-active" type="button" data-panel="me">わたし</button>
         <button class="tab" type="button" data-panel="lover">お相手</button>
         <button class="tab" type="button" data-panel="account">界隈</button>
@@ -30,7 +30,8 @@
           <label>性別<input id="myGender" maxlength="8" value="♀"></label>
         </div>
         <label>MBTI / 恋愛タイプ<input id="myType" maxlength="18" value="INFJ / 一途"></label>
-        <label>アイコン<input id="avatar" type="file" accept="image/*"></label>
+        <label>プロフ画像<input id="avatar" type="file" accept="image/*"></label>
+        <label>画像の上下位置<input id="avatarY" type="range" min="0" max="100" value="50"></label>
       </form>
 
       <form class="panel" id="panel-lover">
@@ -78,7 +79,7 @@
         <label>ひとこと<textarea id="message" maxlength="90">ゆるく惚気たり日常を残したりします。価値観が近い方と穏やかにつながりたいです。</textarea></label>
       </form>
 
-      <div class="theme-picker" aria-label="色味">
+      <div class="theme-picker">
         <button class="tone-chip is-active" type="button" data-tone="rose" aria-label="ローズ"></button>
         <button class="tone-chip" type="button" data-tone="cream" aria-label="クリーム"></button>
         <button class="tone-chip" type="button" data-tone="mint" aria-label="ミント"></button>
@@ -90,49 +91,52 @@
         <button type="button" id="clear">初期化</button>
         <button type="button" id="save">画像保存</button>
       </div>
-      <p class="save-note" id="saveNote">スマホでは共有画面から「画像を保存」を選べます。</p>
+      <p class="save-note">スマホでは共有画面から「画像を保存」を選べます。</p>
     </section>
 
     <section class="preview-wrap" aria-label="プレビュー">
-      <article class="profile-card tone-rose" id="card">
-        <header class="card-head">
-          <div>
-            <p>REN-AKA PROFILE</p>
-            <h2 id="cardMyName">れん</h2>
+      <article class="profile-card" id="card">
+        <span class="decor decor-a">♡</span>
+        <span class="decor decor-b">✦</span>
+        <span class="decor decor-c">✧</span>
+        <span class="decor decor-d">♡</span>
+        <div class="card-frame">
+          <header class="card-head">
+            <div class="title-pill">✦ koikatsu profile ✦</div>
+            <h2>恋垢プロフィール帳</h2>
+          </header>
+          <div class="card-grid">
+            <section class="photo-column">
+              <div class="field-card photo-card">
+                <h3>プロフ画像</h3>
+                <div class="avatar" id="avatarPreview"><span>恋</span></div>
+              </div>
+              <div class="field-card"><h3>名前</h3><p id="cardMyName">れん</p></div>
+              <div class="field-card"><h3>MBTI / 恋愛タイプ</h3><p id="cardType">INFJ / 一途</p></div>
+            </section>
+            <section class="middle-column">
+              <div class="field-row">
+                <div class="field-card"><h3>年齢 / 性別</h3><p id="cardAgeGender">20↑ / ♀</p></div>
+                <div class="field-card"><h3>記念日</h3><p id="cardAnniversary">2024.05.20</p></div>
+              </div>
+              <div class="field-row">
+                <div class="field-card"><h3>お相手</h3><p id="cardLoverName">彼氏</p></div>
+                <div class="field-card"><h3>出会い</h3><p id="cardMeet">友達の紹介</p></div>
+              </div>
+              <div class="field-row">
+                <div class="field-card"><h3>年齢差</h3><p id="cardAgeGap">+2歳</p></div>
+                <div class="field-card"><h3>身長差</h3><p id="cardHeightGap">+12cm</p></div>
+              </div>
+              <div class="field-card note-card"><h3>ひとこと</h3><p id="cardMessage">ゆるく惚気たり日常を残したりします。価値観が近い方と穏やかにつながりたいです。</p></div>
+            </section>
+            <section class="tag-column">
+              <div class="field-card tag-card"><h3>ステータス</h3><div id="relationTags"></div></div>
+              <div class="field-card tag-card"><h3>アカウント</h3><div id="accountTags"></div></div>
+              <div class="field-card tag-card"><h3>NG</h3><div class="ng" id="ngTags"></div></div>
+            </section>
           </div>
-          <span id="cardAnniversary">2024.05.20</span>
-        </header>
-
-        <div class="card-body">
-          <section class="me-block">
-            <div class="avatar" id="avatarPreview"><span>恋</span></div>
-            <dl>
-              <div><dt>age / gender</dt><dd id="cardAgeGender">20↑ / ♀</dd></div>
-              <div><dt>type</dt><dd id="cardType">INFJ / 一途</dd></div>
-            </dl>
-          </section>
-
-          <section class="pair-block">
-            <h3>ふたりのこと</h3>
-            <div class="pair-grid">
-              <div><span>お相手</span><strong id="cardLoverName">彼氏</strong></div>
-              <div><span>年齢差</span><strong id="cardAgeGap">+2歳</strong></div>
-              <div><span>身長差</span><strong id="cardHeightGap">+12cm</strong></div>
-              <div><span>出会い</span><strong id="cardMeet">友達の紹介</strong></div>
-            </div>
-          </section>
-
-          <section class="tag-block">
-            <h3>ステータス</h3>
-            <div id="relationTags"></div>
-            <h3>アカウント</h3>
-            <div id="accountTags"></div>
-            <h3>NG</h3>
-            <div class="ng" id="ngTags"></div>
-          </section>
+          <footer><span>♡ 穏やかに仲良くしてください ♡</span><span>created by 恋垢プロフィールメーカー</span></footer>
         </div>
-
-        <p class="message" id="cardMessage">ゆるく惚気たり日常を残したりします。価値観が近い方と穏やかにつながりたいです。</p>
       </article>
     </section>
   </main>

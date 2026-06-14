@@ -3,6 +3,7 @@ const $$ = (selector) => [...document.querySelectorAll(selector)];
 
 let currentTone = "rose";
 let avatarData = "";
+let avatarY = "50";
 
 const inputs = {
   myName: $("#myName"),
@@ -15,6 +16,7 @@ const inputs = {
   anniversary: $("#anniversary"),
   meet: $("#meet"),
   message: $("#message"),
+  avatarY: $("#avatarY"),
 };
 
 const defaults = {
@@ -34,46 +36,11 @@ const defaults = {
 };
 
 const themes = {
-  rose: {
-    page: "#f6ecec",
-    card: "#fff8f8",
-    accent: "#c9828f",
-    soft: "#efd2d6",
-    ink: "#302a2d",
-    muted: "#83777b",
-  },
-  cream: {
-    page: "#f4efe1",
-    card: "#fffaf0",
-    accent: "#b79348",
-    soft: "#ead7aa",
-    ink: "#302a2d",
-    muted: "#83777b",
-  },
-  mint: {
-    page: "#eef4ef",
-    card: "#fbfffc",
-    accent: "#6f9d7f",
-    soft: "#bdd8c7",
-    ink: "#302a2d",
-    muted: "#83777b",
-  },
-  sky: {
-    page: "#edf4f8",
-    card: "#f8fcff",
-    accent: "#7098b5",
-    soft: "#bfd7e8",
-    ink: "#302a2d",
-    muted: "#83777b",
-  },
-  mono: {
-    page: "#f1efed",
-    card: "#fbfaf8",
-    accent: "#6d6668",
-    soft: "#d9d5d2",
-    ink: "#302a2d",
-    muted: "#83777b",
-  },
+  rose: { page:"#fff1f6", card:"#fff8fb", accent:"#e85f94", line:"#f4b8cf", soft:"#ffe3ed", ink:"#56384a", muted:"#7f6574" },
+  cream: { page:"#f8f1df", card:"#fffaf0", accent:"#b79348", line:"#dfc27c", soft:"#f2dfb4", ink:"#493a25", muted:"#7a6b4c" },
+  mint: { page:"#eef7f1", card:"#fbfffc", accent:"#639c78", line:"#add0bb", soft:"#dff0e5", ink:"#304536", muted:"#607465" },
+  sky: { page:"#eef7fc", card:"#f8fcff", accent:"#5f97bd", line:"#abd1eb", soft:"#dff0fb", ink:"#304250", muted:"#637683" },
+  mono: { page:"#f2efed", card:"#fbfaf8", accent:"#6d6668", line:"#cbc4c1", soft:"#e7e2df", ink:"#343033", muted:"#70686b" },
 };
 
 function clean(input, fallback) {
@@ -82,11 +49,7 @@ function clean(input, fallback) {
 
 function escapeHtml(text) {
   return text.replace(/[&<>"']/g, (char) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;",
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;",
   }[char]));
 }
 
@@ -117,15 +80,12 @@ function render() {
 function setTone(tone) {
   currentTone = tone;
   document.body.className = `tone-${tone}`;
-  $("#card").className = `profile-card tone-${tone}`;
-  $$(".tone-chip").forEach((button) => {
-    button.classList.toggle("is-active", button.dataset.tone === tone);
-  });
+  $$(".tone-chip").forEach((button) => button.classList.toggle("is-active", button.dataset.tone === tone));
 }
 
 function setAvatar(src) {
   avatarData = src;
-  $("#avatarPreview").innerHTML = src ? `<img src="${src}" alt="">` : "<span>恋</span>";
+  $("#avatarPreview").innerHTML = src ? `<img src="${src}" alt="" style="object-position:center ${avatarY}%">` : "<span>恋</span>";
 }
 
 function resetForm() {
@@ -137,6 +97,8 @@ function resetForm() {
       input.checked = defaults[name].includes(input.value);
     });
   });
+  avatarY = "50";
+  inputs.avatarY.value = avatarY;
   $("#avatar").value = "";
   setAvatar("");
   setTone("rose");
@@ -154,10 +116,7 @@ $$(".tab").forEach((tab) => {
 
 Object.values(inputs).forEach((input) => input.addEventListener("input", render));
 $$("input[type='checkbox']").forEach((input) => input.addEventListener("change", render));
-
-$$(".tone-chip").forEach((button) => {
-  button.addEventListener("click", () => setTone(button.dataset.tone));
-});
+$$(".tone-chip").forEach((button) => button.addEventListener("click", () => setTone(button.dataset.tone)));
 
 $("#avatar").addEventListener("change", (event) => {
   const file = event.target.files?.[0];
@@ -167,28 +126,27 @@ $("#avatar").addEventListener("change", (event) => {
   reader.readAsDataURL(file);
 });
 
+$("#avatarY").addEventListener("input", (event) => {
+  avatarY = event.target.value;
+  const img = $("#avatarPreview img");
+  if (img) img.style.objectPosition = `center ${avatarY}%`;
+});
+
 $("#clear").addEventListener("click", resetForm);
 $("#save").addEventListener("click", saveImage);
-$("#closeSheet").addEventListener("click", () => {
-  $("#resultSheet").hidden = true;
-});
+$("#closeSheet").addEventListener("click", () => { $("#resultSheet").hidden = true; });
 
 async function saveImage() {
   const blob = await makePngBlob();
   const file = new File([blob], "renai-profile-card.png", { type: "image/png" });
-
   if (navigator.canShare?.({ files: [file] })) {
     try {
-      await navigator.share({
-        files: [file],
-        title: "恋垢プロフィールカード",
-      });
+      await navigator.share({ files: [file], title: "恋垢プロフィール帳" });
       return;
     } catch (error) {
       if (error.name === "AbortError") return;
     }
   }
-
   showSaveSheet(blob);
 }
 
@@ -211,111 +169,163 @@ function makePngBlob() {
 
 function drawCard(canvas) {
   const ctx = canvas.getContext("2d");
-  const theme = themes[currentTone];
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = theme.card;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  ctx.strokeStyle = theme.soft;
-  ctx.lineWidth = 6;
-  ctx.beginPath();
-  ctx.moveTo(70, 168);
-  ctx.lineTo(1530, 168);
-  ctx.stroke();
-
-  ctx.fillStyle = theme.accent;
-  ctx.font = "900 34px sans-serif";
-  ctx.fillText("REN-AKA PROFILE", 70, 92);
-
-  ctx.fillStyle = theme.ink;
-  fitText(ctx, clean(inputs.myName, "なまえ"), 70, 150, 680, 82, 50, "900");
-
-  ctx.textAlign = "right";
-  ctx.fillStyle = theme.muted;
-  ctx.font = "900 34px sans-serif";
-  ctx.fillText(clean(inputs.anniversary, "記念日"), 1530, 104);
-  ctx.textAlign = "left";
-
-  drawAvatar(ctx, 72, 230, 210, theme);
-  drawInfo(ctx, 320, 260, "age / gender", `${clean(inputs.myAge, "年齢")} / ${clean(inputs.myGender, "性別")}`, theme);
-  drawInfo(ctx, 320, 385, "type", clean(inputs.myType, "MBTI / 恋愛タイプ"), theme);
-
-  drawSectionTitle(ctx, "ふたりのこと", 690, 252, theme);
-  drawBox(ctx, 690, 285, 190, 104, "お相手", clean(inputs.loverName, "お相手"), theme);
-  drawBox(ctx, 900, 285, 190, 104, "年齢差", clean(inputs.ageGap, "年齢差"), theme);
-  drawBox(ctx, 1110, 285, 190, 104, "身長差", clean(inputs.heightGap, "身長差"), theme);
-  drawBox(ctx, 1320, 285, 190, 104, "出会い", clean(inputs.meet, "出会い"), theme);
-
-  drawTagSection(ctx, "ステータス", checkedValues("relation"), "未設定", 690, 470, 800, theme, false);
-  drawTagSection(ctx, "アカウント", checkedValues("account"), "ゆるく更新", 690, 585, 800, theme, false);
-  drawTagSection(ctx, "NG", checkedValues("ng"), "自衛します", 690, 700, 800, theme, true);
-
-  roundRect(ctx, 70, 645, 550, 170, 18, "rgba(255,255,255,.68)");
-  ctx.fillStyle = theme.ink;
-  ctx.font = "34px sans-serif";
-  wrapText(ctx, clean(inputs.message, "ひとこと"), 100, 700, 490, 47, 3);
-}
-
-function drawAvatar(ctx, x, y, size, theme) {
-  roundRect(ctx, x, y, size, size, 18, "#ffffff");
-  if (avatarData) {
-    const img = $("#avatarPreview img");
-    if (img?.complete) {
-      ctx.save();
-      clipRound(ctx, x + 12, y + 12, size - 24, size - 24, 14);
-      coverImage(ctx, img, x + 12, y + 12, size - 24, size - 24);
-      ctx.restore();
-      return;
-    }
-  }
-  roundRect(ctx, x + 12, y + 12, size - 24, size - 24, 14, theme.accent);
-  ctx.fillStyle = "#fff";
-  ctx.font = "900 82px sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText("恋", x + size / 2, y + size / 2 + 30);
-  ctx.textAlign = "left";
-}
-
-function drawInfo(ctx, x, y, label, text, theme) {
-  ctx.fillStyle = theme.muted;
+  const t = themes[currentTone];
+  ctx.clearRect(0, 0, 1600, 900);
+  ctx.fillStyle = t.card;
+  ctx.fillRect(0, 0, 1600, 900);
+  blob(ctx, 130, 126, 155, t.soft);
+  blob(ctx, 1460, 760, 170, t.soft);
+  ctx.fillStyle = t.accent;
+  ctx.globalAlpha = .45;
+  ctx.font = "900 78px sans-serif";
+  ctx.fillText("♡", 54, 92);
+  ctx.fillText("✦", 1450, 112);
+  ctx.fillText("✧", 86, 820);
+  ctx.fillText("♡", 1470, 824);
+  ctx.globalAlpha = 1;
+  panel(ctx, 34, 34, 1532, 832, 34, "rgba(255,255,255,.78)", t.accent, 7);
+  dashedPanel(ctx, 62, 62, 1476, 776, 24, t.line);
+  dottedLine(ctx, 100, 160, 1500, 160, t.line);
+  dottedLine(ctx, 100, 812, 1500, 812, t.line);
+  pill(ctx, 622, 66, 356, 50, t.soft);
+  ctx.fillStyle = t.accent;
   ctx.font = "900 26px sans-serif";
-  ctx.fillText(label, x, y);
-  ctx.fillStyle = theme.ink;
-  fitText(ctx, text, x, y + 50, 300, 36, 24, "900");
+  ctx.textAlign = "center";
+  ctx.fillText("✦ koikatsu profile ✦", 800, 101);
+  ctx.fillStyle = t.ink;
+  ctx.font = "900 52px sans-serif";
+  ctx.fillText("恋垢プロフィール帳", 800, 150);
+  ctx.textAlign = "left";
+
+  photoBox(ctx, 72, 180, 330, 365, t);
+  field(ctx, 72, 565, 330, 102, "名前", clean(inputs.myName, "なまえ"), t, 34);
+  field(ctx, 72, 685, 330, 102, "MBTI / 恋愛タイプ", clean(inputs.myType, "MBTI / 恋愛タイプ"), t, 30);
+  field(ctx, 430, 180, 255, 106, "年齢 / 性別", `${clean(inputs.myAge, "年齢")} / ${clean(inputs.myGender, "性別")}`, t, 30);
+  field(ctx, 710, 180, 255, 106, "記念日", clean(inputs.anniversary, "記念日"), t, 30);
+  field(ctx, 430, 306, 255, 106, "お相手", clean(inputs.loverName, "お相手"), t, 30);
+  field(ctx, 710, 306, 255, 106, "出会い", clean(inputs.meet, "出会い"), t, 28);
+  field(ctx, 430, 432, 255, 106, "年齢差", clean(inputs.ageGap, "年齢差"), t, 30);
+  field(ctx, 710, 432, 255, 106, "身長差", clean(inputs.heightGap, "身長差"), t, 30);
+  note(ctx, 430, 558, 535, 228, "ひとこと", clean(inputs.message, "ひとこと"), t);
+  tags(ctx, 995, 180, 530, 154, "ステータス", checkedValues("relation"), "未設定", t, false);
+  tags(ctx, 995, 354, 530, 215, "アカウント", checkedValues("account"), "ゆるく更新", t, false);
+  tags(ctx, 995, 589, 530, 197, "NG", checkedValues("ng"), "自衛します", t, true);
+  ctx.fillStyle = t.accent;
+  ctx.font = "900 27px sans-serif";
+  ctx.fillText("♡ 穏やかに仲良くしてください ♡", 92, 845);
+  ctx.textAlign = "right";
+  ctx.fillText("created by 恋垢プロフィールメーカー", 1508, 845);
+  ctx.textAlign = "left";
 }
 
-function drawSectionTitle(ctx, text, x, y, theme) {
-  ctx.fillStyle = theme.accent;
-  ctx.font = "900 30px sans-serif";
-  ctx.fillText(text, x, y);
+function photoBox(ctx, x, y, w, h, t) {
+  panel(ctx, x, y, w, h, 20, "rgba(255,255,255,.86)", t.line, 5);
+  label(ctx, x + 22, y + 18, "プロフ画像", t);
+  roundRect(ctx, x + 24, y + 72, w - 48, h - 96, 20, t.soft);
+  dashedPanel(ctx, x + 24, y + 72, w - 48, h - 96, 20, t.line);
+  const img = $("#avatarPreview img");
+  if (avatarData && img?.complete) {
+    ctx.save();
+    clipRound(ctx, x + 32, y + 80, w - 64, h - 112, 16);
+    coverImage(ctx, img, x + 32, y + 80, w - 64, h - 112);
+    ctx.restore();
+  } else {
+    ctx.fillStyle = t.accent;
+    ctx.font = "900 104px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("恋", x + w / 2, y + h / 2 + 58);
+    ctx.textAlign = "left";
+  }
 }
 
-function drawBox(ctx, x, y, width, height, label, value, theme) {
-  roundRect(ctx, x, y, width, height, 16, "rgba(255,255,255,.68)");
-  ctx.fillStyle = theme.muted;
-  ctx.font = "900 22px sans-serif";
-  ctx.fillText(label, x + 18, y + 34);
-  ctx.fillStyle = theme.ink;
-  fitText(ctx, value, x + 18, y + 76, width - 36, 28, 20, "900");
+function field(ctx, x, y, w, h, title, value, t, size) {
+  panel(ctx, x, y, w, h, 20, "rgba(255,255,255,.86)", t.line, 5);
+  label(ctx, x + 18, y + 14, title, t);
+  ctx.fillStyle = t.ink;
+  fitText(ctx, value, x + 22, y + h - 24, w - 44, size, 20, "900");
+  dottedLine(ctx, x + 20, y + h - 16, x + w - 20, y + h - 16, t.line);
 }
 
-function drawTagSection(ctx, title, values, fallback, x, y, maxWidth, theme, isNg) {
-  drawSectionTitle(ctx, title, x, y, theme);
-  let cursorX = x;
-  let cursorY = y + 28;
+function note(ctx, x, y, w, h, title, value, t) {
+  panel(ctx, x, y, w, h, 20, "rgba(255,255,255,.86)", t.line, 5);
+  label(ctx, x + 18, y + 14, title, t);
+  roundRect(ctx, x + 20, y + 72, w - 40, h - 94, 18, "#fff");
+  ctx.fillStyle = t.ink;
+  ctx.font = "30px sans-serif";
+  wrapText(ctx, value, x + 42, y + 116, w - 84, 42, 3);
+}
+
+function tags(ctx, x, y, w, h, title, values, fallback, t, isNg) {
+  panel(ctx, x, y, w, h, 20, "rgba(255,255,255,.86)", t.line, 5);
+  label(ctx, x + 18, y + 14, title, t);
+  let cx = x + 22;
+  let cy = y + 76;
   const list = values.length ? values : [fallback];
   list.forEach((text) => {
-    ctx.font = "900 24px sans-serif";
-    const width = Math.min(ctx.measureText(text).width + 46, 210);
-    if (cursorX + width > x + maxWidth) {
-      cursorX = x;
-      cursorY += 48;
+    ctx.font = "900 25px sans-serif";
+    const tw = Math.min(ctx.measureText(text).width + 48, 210);
+    if (cx + tw > x + w - 22) {
+      cx = x + 22;
+      cy += 49;
     }
-    roundRect(ctx, cursorX, cursorY, width, 38, 19, isNg ? "rgba(255,255,255,.78)" : theme.soft);
-    ctx.fillStyle = isNg ? "#75464e" : theme.ink;
-    ctx.fillText(text, cursorX + 23, cursorY + 27);
-    cursorX += width + 12;
+    pill(ctx, cx, cy, tw, 40, isNg ? "#fff" : t.soft);
+    ctx.fillStyle = isNg ? "#75464e" : t.ink;
+    ctx.fillText(text, cx + 24, cy + 28);
+    cx += tw + 12;
   });
+}
+
+function label(ctx, x, y, text, t) {
+  ctx.font = "900 23px sans-serif";
+  const w = ctx.measureText(text).width + 38;
+  pill(ctx, x, y, w, 36, t.soft);
+  ctx.fillStyle = t.accent;
+  ctx.fillText(text, x + 19, y + 26);
+}
+
+function panel(ctx, x, y, w, h, r, fill, stroke, lineWidth) {
+  roundRect(ctx, x, y, w, h, r, fill);
+  ctx.strokeStyle = stroke;
+  ctx.lineWidth = lineWidth;
+  roundedPath(ctx, x, y, w, h, r);
+  ctx.stroke();
+}
+
+function dashedPanel(ctx, x, y, w, h, r, color) {
+  ctx.save();
+  ctx.setLineDash([16, 14]);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 5;
+  roundedPath(ctx, x, y, w, h, r);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function dottedLine(ctx, x1, y1, x2, y2, color) {
+  ctx.save();
+  ctx.setLineDash([2, 14]);
+  ctx.lineCap = "round";
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function blob(ctx, x, y, r, color) {
+  ctx.save();
+  ctx.globalAlpha = .9;
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function pill(ctx, x, y, w, h, fill) {
+  roundRect(ctx, x, y, w, h, h / 2, fill);
 }
 
 function fitText(ctx, text, x, y, maxWidth, startSize, minSize, weight) {
@@ -345,35 +355,35 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
   ctx.fillText(line, x, y);
 }
 
-function roundRect(ctx, x, y, width, height, radius, fill) {
-  roundedPath(ctx, x, y, width, height, radius);
+function roundRect(ctx, x, y, w, h, r, fill) {
+  roundedPath(ctx, x, y, w, h, r);
   ctx.fillStyle = fill;
   ctx.fill();
 }
 
-function clipRound(ctx, x, y, width, height, radius) {
-  roundedPath(ctx, x, y, width, height, radius);
+function clipRound(ctx, x, y, w, h, r) {
+  roundedPath(ctx, x, y, w, h, r);
   ctx.clip();
 }
 
-function roundedPath(ctx, x, y, width, height, radius) {
-  const r = Math.min(radius, width / 2, height / 2);
+function roundedPath(ctx, x, y, w, h, r) {
+  const radius = Math.min(r, w / 2, h / 2);
   ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + width, y, x + width, y + height, r);
-  ctx.arcTo(x + width, y + height, x, y + height, r);
-  ctx.arcTo(x, y + height, x, y, r);
-  ctx.arcTo(x, y, x + width, y, r);
+  ctx.moveTo(x + radius, y);
+  ctx.arcTo(x + w, y, x + w, y + h, radius);
+  ctx.arcTo(x + w, y + h, x, y + h, radius);
+  ctx.arcTo(x, y + h, x, y, radius);
+  ctx.arcTo(x, y, x + w, y, radius);
   ctx.closePath();
 }
 
-function coverImage(ctx, img, x, y, width, height) {
-  const scale = Math.max(width / img.naturalWidth, height / img.naturalHeight);
-  const sw = width / scale;
-  const sh = height / scale;
+function coverImage(ctx, img, x, y, w, h) {
+  const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight);
+  const sw = w / scale;
+  const sh = h / scale;
   const sx = (img.naturalWidth - sw) / 2;
-  const sy = (img.naturalHeight - sh) / 2;
-  ctx.drawImage(img, sx, sy, sw, sh, x, y, width, height);
+  const sy = (img.naturalHeight - sh) * (Number(avatarY) / 100);
+  ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
 }
 
 setTone("rose");
