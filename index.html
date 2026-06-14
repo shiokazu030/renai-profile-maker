@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>恋垢プロフィールメーカー</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="app">
+    <section class="tools" aria-label="プロフィール入力">
+      <header class="title">
+        <span class="logo">恋</span>
+        <div>
+          <h1>恋垢プロフィールメーカー</h1>
+          <p>letter card ver</p>
+        </div>
+      </header>
+
+      <div class="tabs" role="tablist" aria-label="入力カテゴリ">
+        <button class="tab is-active" type="button" data-panel="me">わたし</button>
+        <button class="tab" type="button" data-panel="lover">お相手</button>
+        <button class="tab" type="button" data-panel="account">界隈</button>
+      </div>
+
+      <form class="panel is-active" id="panel-me">
+        <label>名前<input id="myName" maxlength="14" value="れん"></label>
+        <div class="grid2">
+          <label>年齢<input id="myAge" maxlength="8" value="20↑"></label>
+          <label>性別<input id="myGender" maxlength="8" value="♀"></label>
+        </div>
+        <label>MBTI / 恋愛タイプ<input id="myType" maxlength="18" value="INFJ / 一途"></label>
+        <label>アイコン<input id="avatar" type="file" accept="image/*"></label>
+      </form>
+
+      <form class="panel" id="panel-lover">
+        <label>お相手<input id="loverName" maxlength="14" value="彼氏"></label>
+        <div class="grid2">
+          <label>年齢差<input id="ageGap" maxlength="10" value="+2歳"></label>
+          <label>身長差<input id="heightGap" maxlength="10" value="+12cm"></label>
+        </div>
+        <label>記念日<input id="anniversary" maxlength="16" value="2024.05.20"></label>
+        <label>出会い<input id="meet" maxlength="20" value="友達の紹介"></label>
+      </form>
+
+      <form class="panel" id="panel-account">
+        <fieldset>
+          <legend>ふたりの距離</legend>
+          <div class="check-grid">
+            <label><input type="checkbox" name="relation" value="近距離" checked>近距離</label>
+            <label><input type="checkbox" name="relation" value="中距離">中距離</label>
+            <label><input type="checkbox" name="relation" value="遠距離">遠距離</label>
+            <label><input type="checkbox" name="relation" value="婚約済み">婚約済み</label>
+            <label><input type="checkbox" name="relation" value="同棲中">同棲中</label>
+            <label><input type="checkbox" name="relation" value="片思い">片思い</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>アカウント</legend>
+          <div class="check-grid">
+            <label><input type="checkbox" name="account" value="惚気" checked>惚気</label>
+            <label><input type="checkbox" name="account" value="日常" checked>日常</label>
+            <label><input type="checkbox" name="account" value="病み">病み</label>
+            <label><input type="checkbox" name="account" value="呼びタメOK" checked>呼びタメOK</label>
+            <label><input type="checkbox" name="account" value="少人数希望">少人数希望</label>
+            <label><input type="checkbox" name="account" value="相互希望">相互希望</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>NG</legend>
+          <div class="check-grid">
+            <label><input type="checkbox" name="ng" value="R18">R18</label>
+            <label><input type="checkbox" name="ng" value="不倫" checked>不倫</label>
+            <label><input type="checkbox" name="ng" value="晒し" checked>晒し</label>
+            <label><input type="checkbox" name="ng" value="過度な監視">過度な監視</label>
+          </div>
+        </fieldset>
+        <label>ひとこと<textarea id="message" maxlength="90">ゆるく惚気たり日常を残したりします。価値観が近い方と穏やかにつながりたいです。</textarea></label>
+      </form>
+
+      <div class="actions">
+        <button type="button" id="tone">色味変更</button>
+        <button type="button" id="download">PNG保存</button>
+      </div>
+    </section>
+
+    <section class="preview-wrap" aria-label="プレビュー">
+      <article class="profile-card tone-rose" id="card">
+        <img src="./assets/stationery-bg.png" alt="" class="card-bg">
+        <div class="paper">
+          <header class="card-header">
+            <div>
+              <p>REN-AKA PROFILE</p>
+              <h2 id="cardMyName">れん</h2>
+            </div>
+            <span id="cardAnniversary">2024.05.20</span>
+          </header>
+
+          <section class="intro">
+            <div class="avatar" id="avatarPreview"><span>恋</span></div>
+            <dl>
+              <div><dt>age / gender</dt><dd id="cardAgeGender">20↑ / ♀</dd></div>
+              <div><dt>type</dt><dd id="cardType">INFJ / 一途</dd></div>
+            </dl>
+          </section>
+
+          <section class="pair">
+            <h3>ふたりのこと</h3>
+            <div class="pair-grid">
+              <div><span>お相手</span><strong id="cardLoverName">彼氏</strong></div>
+              <div><span>年齢差</span><strong id="cardAgeGap">+2歳</strong></div>
+              <div><span>身長差</span><strong id="cardHeightGap">+12cm</strong></div>
+              <div><span>出会い</span><strong id="cardMeet">友達の紹介</strong></div>
+            </div>
+          </section>
+
+          <section class="tags">
+            <h3>ステータス</h3>
+            <div id="relationTags"></div>
+          </section>
+
+          <section class="tags">
+            <h3>アカウント</h3>
+            <div id="accountTags"></div>
+          </section>
+
+          <section class="tags ng">
+            <h3>NG</h3>
+            <div id="ngTags"></div>
+          </section>
+
+          <p class="message" id="cardMessage">ゆるく惚気たり日常を残したりします。価値観が近い方と穏やかにつながりたいです。</p>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <canvas id="canvas" width="1200" height="1600" hidden></canvas>
+  <script src="./app.js"></script>
+</body>
+</html>
