@@ -20,11 +20,13 @@ button, input, textarea { font: inherit; }
 .app {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: minmax(320px, 420px) 1fr;
-  gap: 24px;
-  padding: 24px;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  padding: 22px;
 }
 .tools {
+  width: min(980px, 100%);
+  justify-self: center;
   align-self: start;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -130,7 +132,7 @@ input:focus, textarea:focus {
 .preview-wrap { display: grid; place-items: center; min-width: 0; }
 .profile-card {
   position: relative;
-  width: min(900px, 100%);
+  width: min(1180px, 100%);
   aspect-ratio: 16 / 9;
   overflow: hidden;
   border: 7px solid var(--line);
@@ -288,10 +290,8 @@ footer {
 .sheet p { margin: 10px 0 0; color: var(--muted); font-size: 13px; text-align: center; }
 @media (max-width: 920px) {
   .app { grid-template-columns: 1fr; padding: 14px; }
-  .tools { order: 2; }
-  .preview-wrap { order: 1; }
 }
 @media (max-width: 620px) {
   .preview-wrap { overflow-x: auto; justify-content: start; padding-bottom: 6px; }
-  .profile-card { min-width: 820px; }
+  .profile-card { min-width: 860px; }
 }
