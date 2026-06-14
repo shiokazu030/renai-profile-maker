@@ -1,5 +1,5 @@
-const tones = ["rose", "mocha", "lilac", "blue"];
-let toneIndex = 0;
+const tones = ["rose", "sage", "sky", "mono"];
+let currentTone = "rose";
 let avatarData = "";
 
 const $ = (selector) => document.querySelector(selector);
@@ -19,14 +19,30 @@ const inputs = {
 };
 
 const toneMap = {
-  rose: ["#c9828f", "#e8c0c2", "#9aa98d", "#2f2930"],
-  mocha: ["#a5796a", "#dfc3b7", "#8fa59a", "#2f2930"],
-  lilac: ["#9b83b5", "#d8c9e8", "#9ba98d", "#2f2930"],
-  blue: ["#7896aa", "#c7d7df", "#c48b91", "#2f2930"],
+  rose: ["#c9828f", "#e8c0c2", "#9aa98d", "#2f2930", "#f6ecec"],
+  sage: ["#7f9b88", "#d8dfcf", "#b28e86", "#2f2930", "#eef3eb"],
+  sky: ["#7896aa", "#d7e3e9", "#c48b91", "#2f2930", "#edf4f7"],
+  mono: ["#6c6468", "#e5e0dc", "#8c7b80", "#2f2930", "#f2efed"],
 };
 
 const bg = new Image();
 bg.src = "./assets/stationery-bg.png";
+
+const defaults = {
+  myName: "れん",
+  myAge: "20↑",
+  myGender: "♀",
+  myType: "INFJ / 一途",
+  loverName: "彼氏",
+  ageGap: "+2歳",
+  heightGap: "+12cm",
+  anniversary: "2024.05.20",
+  meet: "友達の紹介",
+  message: "ゆるく惚気たり日常を残したりします。価値観が近い方と穏やかにつながりたいです。",
+  relation: ["近距離"],
+  account: ["惚気", "日常", "呼びタメOK"],
+  ng: ["不倫", "晒し"],
+};
 
 function value(input, fallback) {
   return input.value.trim() || fallback;
@@ -66,10 +82,14 @@ function render() {
   tags("#ngTags", checkedValues("ng"), "自衛します");
 }
 
-function setTone(index) {
-  toneIndex = index;
+function setTone(tone) {
+  currentTone = tone;
   const card = $("#card");
-  card.className = `profile-card tone-${tones[toneIndex]}`;
+  card.className = `profile-card tone-${currentTone}`;
+  document.body.className = `tone-${currentTone}`;
+  $$(".tone-chip").forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.tone === currentTone);
+  });
 }
 
 function setAvatar(src) {
@@ -102,8 +122,23 @@ $("#avatar").addEventListener("change", (event) => {
   reader.readAsDataURL(file);
 });
 
-$("#tone").addEventListener("click", () => {
-  setTone((toneIndex + 1) % tones.length);
+$$(".tone-chip").forEach((button) => {
+  button.addEventListener("click", () => setTone(button.dataset.tone));
+});
+
+$("#clear").addEventListener("click", () => {
+  Object.entries(defaults).forEach(([key, val]) => {
+    if (inputs[key]) inputs[key].value = val;
+  });
+  ["relation", "account", "ng"].forEach((name) => {
+    $$(`input[name="${name}"]`).forEach((input) => {
+      input.checked = defaults[name].includes(input.value);
+    });
+  });
+  $("#avatar").value = "";
+  setAvatar("");
+  setTone("rose");
+  render();
 });
 
 $("#download").addEventListener("click", async () => {
@@ -111,23 +146,23 @@ $("#download").addEventListener("click", async () => {
 });
 
 async function exportCard() {
+  await ensureImage(bg);
   const canvas = $("#canvas");
   const ctx = canvas.getContext("2d");
-  const [accent, accent2, accent3, ink] = toneMap[tones[toneIndex]];
+  const [accent, accent2, accent3, ink, page] = toneMap[currentTone];
   const w = canvas.width;
   const h = canvas.height;
   ctx.clearRect(0, 0, w, h);
 
-  roundRect(ctx, 0, 0, w, h, 34, "#fff7f7");
-  if (bg.complete) {
-    ctx.globalAlpha = .78;
-    coverImage(ctx, bg, 0, 0, w, h);
-    ctx.globalAlpha = 1;
-  }
-  ctx.fillStyle = "rgba(255, 252, 250, .70)";
+  roundRect(ctx, 0, 0, w, h, 34, page);
+  ctx.globalAlpha = .28;
+  coverImage(ctx, bg, 0, 0, w, h);
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = "rgba(255, 252, 250, .62)";
   ctx.fillRect(0, 0, w, h);
 
-  roundRect(ctx, 58, 58, w - 116, h - 116, 28, "rgba(255,255,255,.78)");
+  drawNotebookLines(ctx, 86, 104, w - 172, h - 208, accent);
+  roundRect(ctx, 58, 58, w - 116, h - 116, 28, "rgba(255,255,255,.82)");
   ctx.strokeStyle = "rgba(255,255,255,.92)";
   ctx.lineWidth = 4;
   roundedPath(ctx, 58, 58, w - 116, h - 116, 28);
@@ -167,6 +202,20 @@ async function exportCard() {
   link.download = "renai-profile-card.png";
   link.href = canvas.toDataURL("image/png");
   link.click();
+}
+
+function drawNotebookLines(ctx, x, y, width, height, color) {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.globalAlpha = .15;
+  ctx.lineWidth = 2;
+  for (let lineY = y; lineY < y + height; lineY += 44) {
+    ctx.beginPath();
+    ctx.moveTo(x, lineY);
+    ctx.lineTo(x + width, lineY);
+    ctx.stroke();
+  }
+  ctx.restore();
 }
 
 async function drawAvatar(ctx, x, y, size, accent, accent2) {
@@ -302,4 +351,13 @@ function loadImage(src) {
   });
 }
 
+function ensureImage(img) {
+  if (img.complete && img.naturalWidth) return Promise.resolve();
+  return new Promise((resolve) => {
+    img.addEventListener("load", resolve, { once: true });
+    img.addEventListener("error", resolve, { once: true });
+  });
+}
+
+setTone("rose");
 render();
