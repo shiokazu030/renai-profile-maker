@@ -6,14 +6,14 @@
   <title>恋垢プロフィールメーカー</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
-<body>
+<body class="tone-rose">
   <main class="app">
     <section class="tools" aria-label="プロフィール入力">
       <header class="title">
         <span class="logo">恋</span>
         <div>
           <h1>恋垢プロフィールメーカー</h1>
-          <p>letter card ver</p>
+          <p>横長シンプルカード</p>
         </div>
       </header>
 
@@ -80,30 +80,31 @@
 
       <div class="theme-picker" aria-label="色味">
         <button class="tone-chip is-active" type="button" data-tone="rose" aria-label="ローズ"></button>
-        <button class="tone-chip" type="button" data-tone="sage" aria-label="セージ"></button>
+        <button class="tone-chip" type="button" data-tone="cream" aria-label="クリーム"></button>
+        <button class="tone-chip" type="button" data-tone="mint" aria-label="ミント"></button>
         <button class="tone-chip" type="button" data-tone="sky" aria-label="スカイ"></button>
         <button class="tone-chip" type="button" data-tone="mono" aria-label="モノ"></button>
       </div>
 
       <div class="actions">
         <button type="button" id="clear">初期化</button>
-        <button type="button" id="download">画像保存</button>
+        <button type="button" id="save">画像保存</button>
       </div>
+      <p class="save-note" id="saveNote">スマホでは共有画面から「画像を保存」を選べます。</p>
     </section>
 
     <section class="preview-wrap" aria-label="プレビュー">
       <article class="profile-card tone-rose" id="card">
-        <img src="./assets/stationery-bg.png" alt="" class="card-bg">
-        <div class="paper">
-          <header class="card-header">
-            <div>
-              <p>REN-AKA PROFILE</p>
-              <h2 id="cardMyName">れん</h2>
-            </div>
-            <span id="cardAnniversary">2024.05.20</span>
-          </header>
+        <header class="card-head">
+          <div>
+            <p>REN-AKA PROFILE</p>
+            <h2 id="cardMyName">れん</h2>
+          </div>
+          <span id="cardAnniversary">2024.05.20</span>
+        </header>
 
-          <section class="intro">
+        <div class="card-body">
+          <section class="me-block">
             <div class="avatar" id="avatarPreview"><span>恋</span></div>
             <dl>
               <div><dt>age / gender</dt><dd id="cardAgeGender">20↑ / ♀</dd></div>
@@ -111,7 +112,7 @@
             </dl>
           </section>
 
-          <section class="pair">
+          <section class="pair-block">
             <h3>ふたりのこと</h3>
             <div class="pair-grid">
               <div><span>お相手</span><strong id="cardLoverName">彼氏</strong></div>
@@ -121,28 +122,31 @@
             </div>
           </section>
 
-          <section class="tags">
+          <section class="tag-block">
             <h3>ステータス</h3>
             <div id="relationTags"></div>
-          </section>
-
-          <section class="tags">
             <h3>アカウント</h3>
             <div id="accountTags"></div>
-          </section>
-
-          <section class="tags ng">
             <h3>NG</h3>
-            <div id="ngTags"></div>
+            <div class="ng" id="ngTags"></div>
           </section>
-
-          <p class="message" id="cardMessage">ゆるく惚気たり日常を残したりします。価値観が近い方と穏やかにつながりたいです。</p>
         </div>
+
+        <p class="message" id="cardMessage">ゆるく惚気たり日常を残したりします。価値観が近い方と穏やかにつながりたいです。</p>
       </article>
     </section>
   </main>
 
-  <canvas id="canvas" width="1200" height="1600" hidden></canvas>
+  <div class="sheet" id="resultSheet" hidden>
+    <div class="sheet-inner">
+      <button class="sheet-close" type="button" id="closeSheet" aria-label="閉じる">×</button>
+      <img id="resultImage" alt="保存用画像">
+      <a id="downloadLink" download="renai-profile-card.png">画像をダウンロード</a>
+      <p>画像を長押しして保存もできます。</p>
+    </div>
+  </div>
+
+  <canvas id="canvas" width="1600" height="900" hidden></canvas>
   <script src="./app.js"></script>
 </body>
 </html>

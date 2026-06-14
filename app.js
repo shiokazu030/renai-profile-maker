@@ -1,9 +1,8 @@
-const tones = ["rose", "sage", "sky", "mono"];
-let currentTone = "rose";
-let avatarData = "";
-
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
+
+let currentTone = "rose";
+let avatarData = "";
 
 const inputs = {
   myName: $("#myName"),
@@ -17,16 +16,6 @@ const inputs = {
   meet: $("#meet"),
   message: $("#message"),
 };
-
-const toneMap = {
-  rose: ["#c9828f", "#e8c0c2", "#9aa98d", "#2f2930", "#f6ecec"],
-  sage: ["#7f9b88", "#d8dfcf", "#b28e86", "#2f2930", "#eef3eb"],
-  sky: ["#7896aa", "#d7e3e9", "#c48b91", "#2f2930", "#edf4f7"],
-  mono: ["#6c6468", "#e5e0dc", "#8c7b80", "#2f2930", "#f2efed"],
-};
-
-const bg = new Image();
-bg.src = "./assets/stationery-bg.png";
 
 const defaults = {
   myName: "れん",
@@ -44,17 +33,51 @@ const defaults = {
   ng: ["不倫", "晒し"],
 };
 
-function value(input, fallback) {
+const themes = {
+  rose: {
+    page: "#f6ecec",
+    card: "#fff8f8",
+    accent: "#c9828f",
+    soft: "#efd2d6",
+    ink: "#302a2d",
+    muted: "#83777b",
+  },
+  cream: {
+    page: "#f4efe1",
+    card: "#fffaf0",
+    accent: "#b79348",
+    soft: "#ead7aa",
+    ink: "#302a2d",
+    muted: "#83777b",
+  },
+  mint: {
+    page: "#eef4ef",
+    card: "#fbfffc",
+    accent: "#6f9d7f",
+    soft: "#bdd8c7",
+    ink: "#302a2d",
+    muted: "#83777b",
+  },
+  sky: {
+    page: "#edf4f8",
+    card: "#f8fcff",
+    accent: "#7098b5",
+    soft: "#bfd7e8",
+    ink: "#302a2d",
+    muted: "#83777b",
+  },
+  mono: {
+    page: "#f1efed",
+    card: "#fbfaf8",
+    accent: "#6d6668",
+    soft: "#d9d5d2",
+    ink: "#302a2d",
+    muted: "#83777b",
+  },
+};
+
+function clean(input, fallback) {
   return input.value.trim() || fallback;
-}
-
-function checkedValues(name) {
-  return $$(`input[name="${name}"]:checked`).map((item) => item.value);
-}
-
-function tags(target, values, fallback) {
-  const list = values.length ? values : [fallback];
-  $(target).innerHTML = list.map((item) => `<span>${escapeHtml(item)}</span>`).join("");
 }
 
 function escapeHtml(text) {
@@ -67,34 +90,57 @@ function escapeHtml(text) {
   }[char]));
 }
 
+function checkedValues(name) {
+  return $$(`input[name="${name}"]:checked`).map((item) => item.value);
+}
+
+function renderTags(target, values, fallback) {
+  const list = values.length ? values : [fallback];
+  $(target).innerHTML = list.map((item) => `<span>${escapeHtml(item)}</span>`).join("");
+}
+
 function render() {
-  $("#cardMyName").textContent = value(inputs.myName, "なまえ");
-  $("#cardAgeGender").textContent = `${value(inputs.myAge, "年齢")} / ${value(inputs.myGender, "性別")}`;
-  $("#cardType").textContent = value(inputs.myType, "MBTI / 恋愛タイプ");
-  $("#cardLoverName").textContent = value(inputs.loverName, "お相手");
-  $("#cardAgeGap").textContent = value(inputs.ageGap, "年齢差");
-  $("#cardHeightGap").textContent = value(inputs.heightGap, "身長差");
-  $("#cardAnniversary").textContent = value(inputs.anniversary, "記念日");
-  $("#cardMeet").textContent = value(inputs.meet, "出会い");
-  $("#cardMessage").textContent = value(inputs.message, "ひとこと");
-  tags("#relationTags", checkedValues("relation"), "未設定");
-  tags("#accountTags", checkedValues("account"), "ゆるく更新");
-  tags("#ngTags", checkedValues("ng"), "自衛します");
+  $("#cardMyName").textContent = clean(inputs.myName, "なまえ");
+  $("#cardAgeGender").textContent = `${clean(inputs.myAge, "年齢")} / ${clean(inputs.myGender, "性別")}`;
+  $("#cardType").textContent = clean(inputs.myType, "MBTI / 恋愛タイプ");
+  $("#cardLoverName").textContent = clean(inputs.loverName, "お相手");
+  $("#cardAgeGap").textContent = clean(inputs.ageGap, "年齢差");
+  $("#cardHeightGap").textContent = clean(inputs.heightGap, "身長差");
+  $("#cardAnniversary").textContent = clean(inputs.anniversary, "記念日");
+  $("#cardMeet").textContent = clean(inputs.meet, "出会い");
+  $("#cardMessage").textContent = clean(inputs.message, "ひとこと");
+  renderTags("#relationTags", checkedValues("relation"), "未設定");
+  renderTags("#accountTags", checkedValues("account"), "ゆるく更新");
+  renderTags("#ngTags", checkedValues("ng"), "自衛します");
 }
 
 function setTone(tone) {
   currentTone = tone;
-  const card = $("#card");
-  card.className = `profile-card tone-${currentTone}`;
-  document.body.className = `tone-${currentTone}`;
+  document.body.className = `tone-${tone}`;
+  $("#card").className = `profile-card tone-${tone}`;
   $$(".tone-chip").forEach((button) => {
-    button.classList.toggle("is-active", button.dataset.tone === currentTone);
+    button.classList.toggle("is-active", button.dataset.tone === tone);
   });
 }
 
 function setAvatar(src) {
   avatarData = src;
   $("#avatarPreview").innerHTML = src ? `<img src="${src}" alt="">` : "<span>恋</span>";
+}
+
+function resetForm() {
+  Object.entries(defaults).forEach(([key, value]) => {
+    if (inputs[key]) inputs[key].value = value;
+  });
+  ["relation", "account", "ng"].forEach((name) => {
+    $$(`input[name="${name}"]`).forEach((input) => {
+      input.checked = defaults[name].includes(input.value);
+    });
+  });
+  $("#avatar").value = "";
+  setAvatar("");
+  setTone("rose");
+  render();
 }
 
 $$(".tab").forEach((tab) => {
@@ -106,12 +152,11 @@ $$(".tab").forEach((tab) => {
   });
 });
 
-Object.values(inputs).forEach((input) => {
-  input.addEventListener("input", render);
-});
+Object.values(inputs).forEach((input) => input.addEventListener("input", render));
+$$("input[type='checkbox']").forEach((input) => input.addEventListener("change", render));
 
-$$("input[type='checkbox']").forEach((input) => {
-  input.addEventListener("change", render);
+$$(".tone-chip").forEach((button) => {
+  button.addEventListener("click", () => setTone(button.dataset.tone));
 });
 
 $("#avatar").addEventListener("change", (event) => {
@@ -122,162 +167,154 @@ $("#avatar").addEventListener("change", (event) => {
   reader.readAsDataURL(file);
 });
 
-$$(".tone-chip").forEach((button) => {
-  button.addEventListener("click", () => setTone(button.dataset.tone));
+$("#clear").addEventListener("click", resetForm);
+$("#save").addEventListener("click", saveImage);
+$("#closeSheet").addEventListener("click", () => {
+  $("#resultSheet").hidden = true;
 });
 
-$("#clear").addEventListener("click", () => {
-  Object.entries(defaults).forEach(([key, val]) => {
-    if (inputs[key]) inputs[key].value = val;
-  });
-  ["relation", "account", "ng"].forEach((name) => {
-    $$(`input[name="${name}"]`).forEach((input) => {
-      input.checked = defaults[name].includes(input.value);
-    });
-  });
-  $("#avatar").value = "";
-  setAvatar("");
-  setTone("rose");
-  render();
-});
+async function saveImage() {
+  const blob = await makePngBlob();
+  const file = new File([blob], "renai-profile-card.png", { type: "image/png" });
 
-$("#download").addEventListener("click", async () => {
-  await exportCard();
-});
+  if (navigator.canShare?.({ files: [file] })) {
+    try {
+      await navigator.share({
+        files: [file],
+        title: "恋垢プロフィールカード",
+      });
+      return;
+    } catch (error) {
+      if (error.name === "AbortError") return;
+    }
+  }
 
-async function exportCard() {
-  await ensureImage(bg);
+  showSaveSheet(blob);
+}
+
+function showSaveSheet(blob) {
+  const url = URL.createObjectURL(blob);
+  const image = $("#resultImage");
+  const link = $("#downloadLink");
+  if (image.dataset.url) URL.revokeObjectURL(image.dataset.url);
+  image.dataset.url = url;
+  image.src = url;
+  link.href = url;
+  $("#resultSheet").hidden = false;
+}
+
+function makePngBlob() {
   const canvas = $("#canvas");
+  drawCard(canvas);
+  return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+}
+
+function drawCard(canvas) {
   const ctx = canvas.getContext("2d");
-  const [accent, accent2, accent3, ink, page] = toneMap[currentTone];
-  const w = canvas.width;
-  const h = canvas.height;
-  ctx.clearRect(0, 0, w, h);
+  const theme = themes[currentTone];
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = theme.card;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  roundRect(ctx, 0, 0, w, h, 34, page);
-  ctx.globalAlpha = .28;
-  coverImage(ctx, bg, 0, 0, w, h);
-  ctx.globalAlpha = 1;
-  ctx.fillStyle = "rgba(255, 252, 250, .62)";
-  ctx.fillRect(0, 0, w, h);
-
-  drawNotebookLines(ctx, 86, 104, w - 172, h - 208, accent);
-  roundRect(ctx, 58, 58, w - 116, h - 116, 28, "rgba(255,255,255,.82)");
-  ctx.strokeStyle = "rgba(255,255,255,.92)";
-  ctx.lineWidth = 4;
-  roundedPath(ctx, 58, 58, w - 116, h - 116, 28);
+  ctx.strokeStyle = theme.soft;
+  ctx.lineWidth = 6;
+  ctx.beginPath();
+  ctx.moveTo(70, 168);
+  ctx.lineTo(1530, 168);
   ctx.stroke();
 
-  ctx.fillStyle = accent;
-  ctx.font = "800 32px sans-serif";
-  ctx.fillText("REN-AKA PROFILE", 110, 135);
-  ctx.fillStyle = ink;
-  fitText(ctx, value(inputs.myName, "なまえ"), 110, 226, 550, 96, 58, "800");
-  ctx.fillStyle = "#8c7b80";
-  ctx.font = "800 30px sans-serif";
+  ctx.fillStyle = theme.accent;
+  ctx.font = "900 34px sans-serif";
+  ctx.fillText("REN-AKA PROFILE", 70, 92);
+
+  ctx.fillStyle = theme.ink;
+  fitText(ctx, clean(inputs.myName, "なまえ"), 70, 150, 680, 82, 50, "900");
+
   ctx.textAlign = "right";
-  ctx.fillText(value(inputs.anniversary, "記念日"), w - 110, 148);
+  ctx.fillStyle = theme.muted;
+  ctx.font = "900 34px sans-serif";
+  ctx.fillText(clean(inputs.anniversary, "記念日"), 1530, 104);
   ctx.textAlign = "left";
 
-  await drawAvatar(ctx, 110, 292, 260, accent, accent2);
-  infoLine(ctx, 420, 340, "age / gender", `${value(inputs.myAge, "年齢")} / ${value(inputs.myGender, "性別")}`, ink);
-  infoLine(ctx, 420, 462, "type", value(inputs.myType, "MBTI / 恋愛タイプ"), ink);
+  drawAvatar(ctx, 72, 230, 210, theme);
+  drawInfo(ctx, 320, 260, "age / gender", `${clean(inputs.myAge, "年齢")} / ${clean(inputs.myGender, "性別")}`, theme);
+  drawInfo(ctx, 320, 385, "type", clean(inputs.myType, "MBTI / 恋愛タイプ"), theme);
 
-  sectionTitle(ctx, "ふたりのこと", 110, 645, accent);
-  box(ctx, 110, 675, 230, 118, "お相手", value(inputs.loverName, "お相手"), ink);
-  box(ctx, 365, 675, 230, 118, "年齢差", value(inputs.ageGap, "年齢差"), ink);
-  box(ctx, 620, 675, 230, 118, "身長差", value(inputs.heightGap, "身長差"), ink);
-  box(ctx, 875, 675, 215, 118, "出会い", value(inputs.meet, "出会い"), ink);
+  drawSectionTitle(ctx, "ふたりのこと", 690, 252, theme);
+  drawBox(ctx, 690, 285, 190, 104, "お相手", clean(inputs.loverName, "お相手"), theme);
+  drawBox(ctx, 900, 285, 190, 104, "年齢差", clean(inputs.ageGap, "年齢差"), theme);
+  drawBox(ctx, 1110, 285, 190, 104, "身長差", clean(inputs.heightGap, "身長差"), theme);
+  drawBox(ctx, 1320, 285, 190, 104, "出会い", clean(inputs.meet, "出会い"), theme);
 
-  drawTagSection(ctx, "ステータス", checkedValues("relation"), "未設定", 110, 885, accent, ink);
-  drawTagSection(ctx, "アカウント", checkedValues("account"), "ゆるく更新", 110, 1080, accent3, ink);
-  drawTagSection(ctx, "NG", checkedValues("ng"), "自衛します", 110, 1275, accent2, "#7b4850");
+  drawTagSection(ctx, "ステータス", checkedValues("relation"), "未設定", 690, 470, 800, theme, false);
+  drawTagSection(ctx, "アカウント", checkedValues("account"), "ゆるく更新", 690, 585, 800, theme, false);
+  drawTagSection(ctx, "NG", checkedValues("ng"), "自衛します", 690, 700, 800, theme, true);
 
-  roundRect(ctx, 110, 1412, 980, 112, 22, "rgba(255,255,255,.70)");
-  ctx.fillStyle = ink;
-  ctx.font = "31px sans-serif";
-  wrapText(ctx, value(inputs.message, "ひとこと"), 138, 1460, 925, 44, 2);
-
-  const link = document.createElement("a");
-  link.download = "renai-profile-card.png";
-  link.href = canvas.toDataURL("image/png");
-  link.click();
+  roundRect(ctx, 70, 645, 550, 170, 18, "rgba(255,255,255,.68)");
+  ctx.fillStyle = theme.ink;
+  ctx.font = "34px sans-serif";
+  wrapText(ctx, clean(inputs.message, "ひとこと"), 100, 700, 490, 47, 3);
 }
 
-function drawNotebookLines(ctx, x, y, width, height, color) {
-  ctx.save();
-  ctx.strokeStyle = color;
-  ctx.globalAlpha = .15;
-  ctx.lineWidth = 2;
-  for (let lineY = y; lineY < y + height; lineY += 44) {
-    ctx.beginPath();
-    ctx.moveTo(x, lineY);
-    ctx.lineTo(x + width, lineY);
-    ctx.stroke();
-  }
-  ctx.restore();
-}
-
-async function drawAvatar(ctx, x, y, size, accent, accent2) {
-  roundRect(ctx, x, y, size, size, 22, "#ffffff");
+function drawAvatar(ctx, x, y, size, theme) {
+  roundRect(ctx, x, y, size, size, 18, "#ffffff");
   if (avatarData) {
-    const img = await loadImage(avatarData);
-    ctx.save();
-    clipRound(ctx, x + 14, y + 14, size - 28, size - 28, 18);
-    coverImage(ctx, img, x + 14, y + 14, size - 28, size - 28);
-    ctx.restore();
-    return;
+    const img = $("#avatarPreview img");
+    if (img?.complete) {
+      ctx.save();
+      clipRound(ctx, x + 12, y + 12, size - 24, size - 24, 14);
+      coverImage(ctx, img, x + 12, y + 12, size - 24, size - 24);
+      ctx.restore();
+      return;
+    }
   }
-  const grad = ctx.createLinearGradient(x, y, x + size, y + size);
-  grad.addColorStop(0, accent);
-  grad.addColorStop(1, accent2);
-  roundRect(ctx, x + 14, y + 14, size - 28, size - 28, 18, grad);
+  roundRect(ctx, x + 12, y + 12, size - 24, size - 24, 14, theme.accent);
   ctx.fillStyle = "#fff";
+  ctx.font = "900 82px sans-serif";
   ctx.textAlign = "center";
-  ctx.font = "900 88px sans-serif";
-  ctx.fillText("恋", x + size / 2, y + size / 2 + 31);
+  ctx.fillText("恋", x + size / 2, y + size / 2 + 30);
   ctx.textAlign = "left";
 }
 
-function infoLine(ctx, x, y, label, text, ink) {
-  ctx.fillStyle = "#8c7b80";
-  ctx.font = "800 28px sans-serif";
+function drawInfo(ctx, x, y, label, text, theme) {
+  ctx.fillStyle = theme.muted;
+  ctx.font = "900 26px sans-serif";
   ctx.fillText(label, x, y);
-  ctx.fillStyle = ink;
-  fitText(ctx, text, x, y + 55, 620, 42, 28, "800");
+  ctx.fillStyle = theme.ink;
+  fitText(ctx, text, x, y + 50, 300, 36, 24, "900");
 }
 
-function sectionTitle(ctx, text, x, y, color) {
-  ctx.fillStyle = color;
-  ctx.font = "800 32px sans-serif";
+function drawSectionTitle(ctx, text, x, y, theme) {
+  ctx.fillStyle = theme.accent;
+  ctx.font = "900 30px sans-serif";
   ctx.fillText(text, x, y);
 }
 
-function box(ctx, x, y, width, height, label, text, ink) {
-  roundRect(ctx, x, y, width, height, 18, "rgba(255,255,255,.68)");
-  ctx.fillStyle = "#8c7b80";
-  ctx.font = "800 24px sans-serif";
-  ctx.fillText(label, x + 20, y + 40);
-  ctx.fillStyle = ink;
-  fitText(ctx, text, x + 20, y + 84, width - 40, 30, 22, "800");
+function drawBox(ctx, x, y, width, height, label, value, theme) {
+  roundRect(ctx, x, y, width, height, 16, "rgba(255,255,255,.68)");
+  ctx.fillStyle = theme.muted;
+  ctx.font = "900 22px sans-serif";
+  ctx.fillText(label, x + 18, y + 34);
+  ctx.fillStyle = theme.ink;
+  fitText(ctx, value, x + 18, y + 76, width - 36, 28, 20, "900");
 }
 
-function drawTagSection(ctx, title, values, fallback, x, y, color, ink) {
-  sectionTitle(ctx, title, x, y, color);
+function drawTagSection(ctx, title, values, fallback, x, y, maxWidth, theme, isNg) {
+  drawSectionTitle(ctx, title, x, y, theme);
   let cursorX = x;
-  let cursorY = y + 35;
+  let cursorY = y + 28;
   const list = values.length ? values : [fallback];
   list.forEach((text) => {
-    ctx.font = "800 27px sans-serif";
-    const width = Math.min(ctx.measureText(text).width + 54, 270);
-    if (cursorX + width > 1090) {
+    ctx.font = "900 24px sans-serif";
+    const width = Math.min(ctx.measureText(text).width + 46, 210);
+    if (cursorX + width > x + maxWidth) {
       cursorX = x;
-      cursorY += 58;
+      cursorY += 48;
     }
-    pill(ctx, cursorX, cursorY, width, 44, "rgba(255,255,255,.68)");
-    ctx.fillStyle = ink;
-    ctx.fillText(text, cursorX + 27, cursorY + 31);
-    cursorX += width + 14;
+    roundRect(ctx, cursorX, cursorY, width, 38, 19, isNg ? "rgba(255,255,255,.78)" : theme.soft);
+    ctx.fillStyle = isNg ? "#75464e" : theme.ink;
+    ctx.fillText(text, cursorX + 23, cursorY + 27);
+    cursorX += width + 12;
   });
 }
 
@@ -308,10 +345,6 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
   ctx.fillText(line, x, y);
 }
 
-function pill(ctx, x, y, width, height, fill) {
-  roundRect(ctx, x, y, width, height, height / 2, fill);
-}
-
 function roundRect(ctx, x, y, width, height, radius, fill) {
   roundedPath(ctx, x, y, width, height, radius);
   ctx.fillStyle = fill;
@@ -335,28 +368,12 @@ function roundedPath(ctx, x, y, width, height, radius) {
 }
 
 function coverImage(ctx, img, x, y, width, height) {
-  const scale = Math.max(width / img.width, height / img.height);
+  const scale = Math.max(width / img.naturalWidth, height / img.naturalHeight);
   const sw = width / scale;
   const sh = height / scale;
-  const sx = (img.width - sw) / 2;
-  const sy = (img.height - sh) / 2;
+  const sx = (img.naturalWidth - sw) / 2;
+  const sy = (img.naturalHeight - sh) / 2;
   ctx.drawImage(img, sx, sy, sw, sh, x, y, width, height);
-}
-
-function loadImage(src) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.src = src;
-  });
-}
-
-function ensureImage(img) {
-  if (img.complete && img.naturalWidth) return Promise.resolve();
-  return new Promise((resolve) => {
-    img.addEventListener("load", resolve, { once: true });
-    img.addEventListener("error", resolve, { once: true });
-  });
 }
 
 setTone("rose");
