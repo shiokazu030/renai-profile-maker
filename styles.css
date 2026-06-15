@@ -302,9 +302,10 @@ footer {
   }
   .tools { padding: 14px; }
   .preview-wrap {
-    --preview-scale: calc((100vw - 20px) / 1180);
+    --preview-scale: .31;
     position: relative;
-    height: calc(663.75px * var(--preview-scale));
+    width: 100%;
+    height: 205px;
     place-items: start;
     overflow: hidden;
   }

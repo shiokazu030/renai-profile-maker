@@ -83,6 +83,19 @@ function setTone(tone) {
   $$(".tone-chip").forEach((button) => button.classList.toggle("is-active", button.dataset.tone === tone));
 }
 
+function fitMobilePreview() {
+  const wrap = $(".preview-wrap");
+  if (!wrap) return;
+  if (window.matchMedia("(max-width: 620px)").matches) {
+    const scale = Math.max(0.24, Math.min(0.52, (window.innerWidth - 20) / 1180));
+    wrap.style.setProperty("--preview-scale", String(scale));
+    wrap.style.height = `${663.75 * scale}px`;
+  } else {
+    wrap.style.removeProperty("--preview-scale");
+    wrap.style.height = "";
+  }
+}
+
 function setAvatar(src) {
   avatarData = src;
   $("#avatarPreview").innerHTML = src ? `<img src="${src}" alt="" style="object-position:center ${avatarY}%">` : "<span>恋</span>";
@@ -135,6 +148,7 @@ $("#avatarY").addEventListener("input", (event) => {
 $("#clear").addEventListener("click", resetForm);
 $("#save").addEventListener("click", saveImage);
 $("#closeSheet").addEventListener("click", () => { $("#resultSheet").hidden = true; });
+window.addEventListener("resize", fitMobilePreview);
 
 async function saveImage() {
   const blob = await makePngBlob();
@@ -388,3 +402,4 @@ function coverImage(ctx, img, x, y, w, h) {
 
 setTone("rose");
 render();
+fitMobilePreview();
