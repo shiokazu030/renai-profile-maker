@@ -132,7 +132,6 @@ input:focus, textarea:focus {
 .preview-wrap { display: grid; place-items: center; min-width: 0; }
 .profile-card {
   position: relative;
-  container-type: inline-size;
   width: min(1180px, 100%);
   aspect-ratio: 16 / 9;
   overflow: hidden;
@@ -312,11 +311,11 @@ footer {
   .title-pill {
     min-height: 18px;
     padding: 2px 10px;
-    font-size: 2.1cqw;
+    font-size: clamp(7px, 2.1vw, 9px);
   }
   .card-head h2 {
     margin-top: 3px;
-    font-size: 4.35cqw;
+    font-size: clamp(14px, 4.2vw, 17px);
   }
   .card-grid {
     height: calc(100% - 50px);
@@ -336,39 +335,39 @@ footer {
   .field-card h3 {
     margin-bottom: 2px;
     padding: 1px 5px;
-    font-size: 1.85cqw;
+    font-size: clamp(6px, 1.7vw, 8px);
   }
   .field-card p {
     border-bottom-width: 1px;
-    font-size: 2.45cqw;
+    font-size: clamp(8px, 2.35vw, 10px);
     line-height: 1.12;
   }
   .photo-card { padding: 4px; }
   .avatar {
     border-width: 2px;
-    font-size: 6.4cqw;
+    font-size: clamp(20px, 6vw, 25px);
   }
   .tag-card div { gap: 2px; }
   .tag-card span {
     padding: 1px 4px;
-    font-size: 1.75cqw;
+    font-size: clamp(6px, 1.65vw, 8px);
   }
   .note-card p {
     border-radius: 4px;
     padding: 2px 4px;
-    font-size: 2.05cqw;
+    font-size: clamp(7px, 1.95vw, 9px);
     line-height: 1.22;
   }
   footer {
     left: 10px;
     right: 10px;
     bottom: 3px;
-    font-size: 1.55cqw;
+    font-size: clamp(5px, 1.5vw, 7px);
   }
   .decor-a,
   .decor-b,
   .decor-c,
   .decor-d {
-    font-size: 5.2cqw;
+    font-size: clamp(16px, 5vw, 21px);
   }
 }
